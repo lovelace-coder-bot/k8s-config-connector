@@ -556,9 +556,6 @@ func normalizeRepresentation(obj interface{}) interface{} {
 		delete(v, "revisionCreateTime")
 		delete(v, "uid")
 		delete(v, "reconciling")
-		if labels, ok := v["labels"].(map[string]interface{}); ok && len(labels) == 0 {
-			delete(v, "labels")
-		}
 		delete(v, "naturalLanguageQueryUnderstandingConfig")
 		delete(v, "solutionTypes")
 		delete(v, "source")
