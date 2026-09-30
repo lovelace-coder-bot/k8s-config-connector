@@ -63,6 +63,18 @@
   3. Kept action fields unchanged in `update.yaml` and tested updates on mutable fields (`displayName` and `conditions.activeTimeRange`).
 - **Impact**: Enables proper direct reconciliation and successful E2E golden file recording against real GCP for `DiscoveryEngineControl`.
 
+### [2026-09-30] DiscoveryEngineSitemap Direct Controller Implementation
+- **Context**: Implementing direct controller, E2E fixtures, and fuzzer for `DiscoveryEngineSitemap` (Issue #13528).
+- **Problem**:
+  1. `CreateSitemap` requires Advanced Site Search to be enabled on the parent `DataStore` / `SiteSearchEngine`, otherwise returning `400 Bad Request: Only Advanced Site Search data stores are permitted to use the Sitemap API`.
+  2. The DiscoveryEngine API returns the project number instead of the project ID in resource names on create/fetch and strictly requires the canonical project number in the resource name for `DeleteSitemap`.
+  3. `DiscoveryEngineSitemap` has server-generated IDs and has no Update RPC in GCP API (it is immutable).
+- **Solution**:
+  1. In `Create`, if `CreateSitemap` reports that Advanced Site Search is required, call `EnableAdvancedSiteSearch` on the parent `siteSearchEngine` LRO and retry `CreateSitemap`.
+  2. During `Create`, only set `a.id.Sitemap` to preserve the user's project ID in `a.id.String()` for KRM status consistency, while in `Delete`, call `Find` first and use `a.actual.GetName()` (which carries the server-assigned project number) for `DeleteSitemap`.
+  3. Handled immutability in `Update` by performing spec diff comparison and returning an error if diffs are detected.
+- **Impact**: Enables smooth creation, re-reconciliation, and deletion of `DiscoveryEngineSitemap` resources with automatic advanced site search provisioning.
+
 ### [2026-10-01] DiscoveryEngineControl MockGCP Alignment and Dynamic Engine Association
 - **Context**: Aligning MockGCP behavior with Real GCP logs for `DiscoveryEngineControl` (Issue #13608).
 - **Problem**: When a `Control` is created under a `dataStore` that is attached to an `Engine`, the real GCP DiscoveryEngine API returns the resource `name` in responses under the `engines/{engine}` hierarchy rather than `dataStores/{dataStore}`.
