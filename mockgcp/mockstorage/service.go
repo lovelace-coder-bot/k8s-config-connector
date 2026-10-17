@@ -148,5 +148,15 @@ func (s *MockService) NewHTTPMux(ctx context.Context, conn *grpc.ClientConn) (ht
 		}
 	}
 
-	return httpmux.FilterBodyOn204(mux)
+	filteredMux, err := httpmux.FilterBodyOn204(mux)
+	if err != nil {
+		return nil, err
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if s.serveBucketIAM(w, r) {
+			return
+		}
+		filteredMux.ServeHTTP(w, r)
+	}), nil
 }

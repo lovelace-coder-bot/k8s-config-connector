@@ -36,4 +36,35 @@ func (s *MockService) ConfigureVisitor(url string, replacements mockgcpregistry.
 }
 
 func (s *MockService) Previsit(event mockgcpregistry.Event, replacements mockgcpregistry.NormalizingVisitor) {
+	if !strings.Contains(event.URL(), "storageinsights") {
+		return
+	}
+
+	previsitValue := func(val string) {
+		if strings.Contains(val, "/reportConfigs/") {
+			tokens := strings.Split(val, "/")
+			for i := 0; i < len(tokens)-1; i++ {
+				if tokens[i] == "reportConfigs" {
+					id := tokens[i+1]
+					if idx := strings.Index(id, "?"); idx != -1 {
+						id = id[:idx]
+					}
+					// Only replace if it looks like a generated ID (e.g. UUID)
+					if len(id) > 0 && id != "dummy" {
+						replacements.ReplaceStringValue(id, "${reportConfigID}")
+					}
+				}
+			}
+		}
+	}
+
+	previsitValue(event.URL())
+
+	event.VisitRequestStringValues(func(path string, value string) {
+		previsitValue(value)
+	})
+
+	event.VisitResponseStringValues(func(path string, value string) {
+		previsitValue(value)
+	})
 }
