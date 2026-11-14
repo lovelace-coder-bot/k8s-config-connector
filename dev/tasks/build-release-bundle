@@ -159,7 +159,6 @@ BLOCKED_KINDS=(
     "CloudTasksQueue"
     "ComputeCrossSiteNetwork"
     "ComputeGlobalVMExtensionPolicy"
-    "ComputeHealthAggregationPolicy"
     "ComputeHealthCheckService"
     "ComputeInterconnectGroup"
     "ComputeNotificationEndpoint"
