@@ -1,0 +1,11 @@
+### [2026-11-28] IAPTunnelDestGroup Judgement Queue Triage and Greenfield Type Finalization
+- **Context**: Greenfield Step 1b (types-judgement) triage and type finalization for `IAPTunnelDestGroup`.
+- **Resource Details**:
+  - Proto: `google.cloud.iap.v1.TunnelDestGroup`
+  - Pattern: `projects/{project}/iap_tunnel/locations/{location}/destGroups/{dest_group}`
+  - RPC: `CreateTunnelDestGroup` specifies `tunnel_dest_group_id` as required (client-specified resource ID).
+  - Output fields: Proto has no server-assigned output-only fields beyond `name` (which maps to identity / `externalRef` / `resourceID`). `ObservedState` is genuinely empty and omitted.
+- **Parent/Hierarchy**:
+  - The resource is project- and location-parented with literal intermediate path `iap_tunnel`.
+  - Replaced separate `projectRef` and `location` with inlined `*parent.ProjectAndLocationRef`.
+- **Impact**: Clean KRM schema with immutable location validation rule, full round-trip mapping and fuzz testing support.
